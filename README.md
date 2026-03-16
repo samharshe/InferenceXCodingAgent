@@ -4,7 +4,18 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/SemiAnalysisAI/InferenceX/pulls)
 [![GitHub Stars](https://img.shields.io/github/stars/SemiAnalysisAI/InferenceX?style=social)](https://github.com/SemiAnalysisAI/InferenceX)
 
-InferenceX™ (formerly InferenceMAX) is an inference performance research platform dedicated to continually analyzing & benchmarking the world’s most popular open-source inference frameworks used by major token factories and models to track real performance in real time. As these software stacks improve, InferenceX™ captures that progress in near real-time, providing a live indicator of inference performance progress. A live dashboard ([soon to be open sourced](https://github.com/SemiAnalysisAI/InferenceX/issues/315))  is available for free publicly at https://inferencex.com/. 
+InferenceX™ (formerly InferenceMAX) is an inference performance research platform dedicated to continually analyzing & benchmarking the world’s most popular open-source inference frameworks used by major token factories and models to track real performance in real time. As these software stacks improve, InferenceX™ captures that progress in near real-time, providing a live indicator of inference performance progress. A live dashboard ([soon to be open sourced](https://github.com/SemiAnalysisAI/InferenceX/issues/315)) is available for free publicly at https://inferencex.com/. 
+
+---
+
+This fork of InferenceX™ adds basic benchmarking for agentic coding workloads. The current test suite has huge coverage for certain types of GPU configurations and output metrics, but its inputs are restricted to baseline single-turn conversations. This repo adds three basic tests that provide better insight into the degredation of performance under more realistic inference conditions.
+
+In particular, the main branch of InferenceX™ allows ISL/OSL of {(1K, 8K), (1K, 1K), and (8K, 1K)}. This fork supports the following additional tests:
+1. TTFT with caching enabled for multiple turns as ISL is incremented in 1K units from 1K to 10K. It is crucial not to waste time refilling the cache for each turn during a conversation. Under ideal conditions, TTFT minimally increases as the ISL is incremented: the previous context should remain in the KV cache, so there is the same marginal work to do in loading the 1k novel tokens for each turn.
+2. ITL with ISL at {8k, 16k, 32k, 64k, 128k}, under single-turn and multi-turn cache-enabled conditions. As the [InferenceXv2 write-up](https://newsletter.semianalysis.com/p/inferencex-v2-nvidia-blackwell-vs) describes, chips make different tradeoffs for compute and memory bandwidth. As context accumulates in an agentic coding session, chips' memory bandwidth is tested during decoding, when the cache must be read out from HBM; simultaneously, compute grows quadratically due to the structure of attention. These tests measure how various chips trade off memory bandwidth against compute.
+3. Cache hit rate with idle times of {1s, 5s, 10s, 1m, 5m} with contexts of {8k, 16k, 32k, 64k, 128k}. Agentic coding is marked by frequent stops and starts as models call tools and wait for responses. This test provides of an indication of a chip's performance with interruptions, which depends significantly on cache eviction strategies; a model that empties its cache every tool call will suffer, while more patient chips that keep context loaded in will not suffer start-up costs once tool calls return.
+
+---
 
 > [!IMPORTANT]
 > Only [SemiAnalysisAI/InferenceX](https://github.com/SemiAnalysisAI/InferenceX) repo contains the Official InferenceX™ result, all other forks & repos are Unofficial. The benchmark setup & quality of machines/clouds in unofficial repos may be differ leading to subpar benchmarking. Unofficial must be explicitly labelled as Unofficial.
