@@ -4,32 +4,6 @@
 
 ---
 
-## ONE-OFF FIX FIRST (Commit 4.5) — before starting Commit 5
-
-**Target:** Fix `generate_sweep_configs.py` crash on agentic entries.
-
-**The bug:** `generate_sweep_configs.py full-sweep` crashes with `KeyError: 'seq-len-configs'`
-when it encounters any entry with `agentic: true`, because the loop unconditionally accesses
-`val[Fields.SEQ_LEN_CONFIGS.value]` at line 160 with no guard for agentic entries.
-
-**The fix:** In `generate_full_sweep` (around line 155–160 of
-`utils/matrix_logic/generate_sweep_configs.py`), add an early `continue` for agentic entries
-immediately after the existing `is_multinode` / `disagg` assignments and before the
-`seq_len_configs = val[Fields.SEQ_LEN_CONFIGS.value]` line:
-
-```python
-if val.get('agentic', False):
-    continue
-```
-
-**Constraints:**
-- Touch ONLY `generate_sweep_configs.py`. No other file.
-- The change must be exactly one guard — do not refactor anything else.
-- After the fix, `python utils/matrix_logic/generate_sweep_configs.py full-sweep --config-files .github/configs/nvidia-master.yaml` must complete without error.
-- `cd utils && python -m pytest matrix_logic/ -v` must still show 142 passing.
-- Commit with `gacp "Fix generate_sweep_configs crash on agentic entries [skip-sweep]"`, then report back. Do NOT proceed to Commit 5.
-
----
 
 Current target: Commit 5 — Scaffold `benchmarks/agentic_coding.sh` with env var validation and constants
 

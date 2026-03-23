@@ -86,6 +86,10 @@ Add real config entries to the master YAML. Validate they pass end-to-end via th
 
 **~~Commit 4 — Add agentic config entries to `nvidia-master.yaml`~~ ✓ DONE**
 
+**~~Commit 4.5 — Fix `generate_sweep_configs` crash on agentic entries~~ ✓ DONE**
+
+- Added `if val.get('agentic', False): continue` guard in `generate_full_sweep` (line ~158 of `generate_sweep_configs.py`) before the `seq-len-configs` access. Agentic entries are silently skipped in the standard sweep.
+
 - Open `.github/configs/nvidia-master.yaml`.
 - Append three placeholder entries (use a placeholder image and model path — mark with `# TODO: replace with real values`):
   ```yaml
