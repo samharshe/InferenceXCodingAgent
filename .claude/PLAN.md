@@ -148,7 +148,7 @@ The shell script is the core runtime artifact. It has no unit tests — correctn
 
 ### Morning 2
 
-**Commit 5 — Scaffold `benchmarks/agentic_coding.sh` with env var validation and constants**
+**~~Commit 5 — Scaffold `benchmarks/agentic_coding.sh` with env var validation and constants~~ ✓ DONE**
 
 - Create `benchmarks/agentic_coding.sh`.
 - Source `benchmark_lib.sh` at the top (same directory).

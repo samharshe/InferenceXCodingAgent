@@ -5,70 +5,87 @@
 ---
 
 
-Current target: Commit 5 — Scaffold `benchmarks/agentic_coding.sh` with env var validation and constants
+Current target: Commit 6 — Add the turn loop with per-turn `benchmark_serving.py` invocations
 
 ## What this commit does
 
-Create `benchmarks/agentic_coding.sh` — a new shell script that validates required environment
-variables, declares hardcoded ISL sweep constants, and sets defaults. No turn loop yet. The script
-exits cleanly after the validation and setup phase.
+Extend `benchmarks/agentic_coding.sh` (the only file you touch) with a six-turn loop that
+calls `benchmark_serving.py` once per turn. After the loop, print a completion message.
+No aggregation yet — that is Commit 7.
 
-No changes to Python files. No changes to YAML files. No changes to existing shell scripts.
-No new directories. One new file only: `benchmarks/agentic_coding.sh`.
+**No other files are modified.** Do not touch Python files, YAML files, `benchmark_lib.sh`,
+or any test file.
 
 ## Exact steps
 
-1. Look at `benchmarks/benchmark_lib.sh` and at least one existing script in `benchmarks/` to
-   understand the conventions (env vars, sourcing pattern, shebang, etc.) before writing anything.
+1. Read `utils/bench_serving/benchmark_serving.py` — specifically its CLI flags — before
+   writing anything. You must confirm the exact flag names for:
+   - specifying host/port or base URL
+   - `--random-input-len`, `--random-prefix-len`, `--random-output-len`, `--random-range-ratio`
+   - `--num-prompts`
+   - saving results (`--save-result`, `--result-filename`, `--result-dir`)
+   Do not guess flag names. Read the source.
 
-2. Create `benchmarks/agentic_coding.sh` with the following content (in order):
-   - Shebang: `#!/usr/bin/env bash`
-   - `set -euo pipefail`
-   - Source `benchmark_lib.sh` from the same directory: `source "$(dirname "$0")/benchmark_lib.sh"`
-   - Declare the three hardcoded ISL sweep arrays:
-     ```bash
-     ISL_VALUES=(1000 11000 21000 31000 41000 51000)
-     PREFIX_LENS=(0 1000 11000 21000 31000 41000)
-     NEW_TOKENS=(1000 10000 10000 10000 10000 10000)
-     ```
-   - Call `check_env_vars` to validate required inputs: `MODEL`, `API_URL`, `TEST_TYPE`, `RESULT_FILE`.
-     Use whatever calling convention `benchmark_lib.sh` defines for `check_env_vars` — read the
-     source before assuming.
-   - Set defaults:
-     ```bash
-     NUM_PROMPTS=${NUM_PROMPTS:-20}
-     DELAY_S=${DELAY_S:-0}
-     ```
-   - Validate `TEST_TYPE` is one of `ttft-caching`, `itl-bandwidth`, `ttft-delays`. If not, print
-     an error message to stderr and `exit 1`.
-   - Echo a startup message so it's clear the script reached the end of validation cleanly.
+2. Add the following block to `benchmarks/agentic_coding.sh` after the startup echo, replacing
+   nothing that is already there:
 
-3. Mark the script executable: `chmod +x benchmarks/agentic_coding.sh`
+   ```bash
+   for t in 0 1 2 3 4 5; do
+       if [[ $t -gt 0 && "${DELAY_S}" -gt 0 ]]; then
+           sleep "$DELAY_S"
+       fi
 
-4. Smoke-test: run the script with missing env vars and confirm it exits non-zero (don't actually
-   run a benchmark). Example:
+       TURN_RESULT_FILE="/tmp/agentic_turn_${t}.json"
+
+       # Parse host and port from API_URL (e.g. http://hostname:8000)
+       API_HOST=$(echo "$API_URL" | sed 's|https\?://||' | cut -d: -f1)
+       API_PORT=$(echo "$API_URL" | sed 's|.*:||')
+
+       python3 <path-to-benchmark_serving.py> \
+           --backend openai \
+           --host "$API_HOST" \
+           --port "$API_PORT" \
+           --model "$MODEL" \
+           --random-input-len "${NEW_TOKENS[$t]}" \
+           --random-prefix-len "${PREFIX_LENS[$t]}" \
+           --random-output-len 1000 \
+           --random-range-ratio 1.0 \
+           --num-prompts "$NUM_PROMPTS" \
+           --save-result \
+           --result-filename "$TURN_RESULT_FILE"
+
+       echo "Turn $t complete: ISL=${ISL_VALUES[$t]}"
+   done
+
+   echo "All turns complete."
+   ```
+
+   Use a path to `benchmark_serving.py` relative to the script's own location
+   (`$(dirname "$0")/../utils/bench_serving/benchmark_serving.py`) — do NOT hardcode an
+   absolute path.
+
+   Verify the flag names against the actual CLI before committing. If the script uses
+   `--result-filename` differently (e.g., requires no `.json` extension, or uses `--result-dir`
+   separately), match the actual interface exactly.
+
+3. Smoke-test — run the script with missing env vars to confirm validation still exits non-zero
+   (the loop must not have broken the guard):
    ```bash
    bash benchmarks/agentic_coding.sh 2>&1 || echo "exited non-zero as expected"
    ```
-   Also test with an invalid TEST_TYPE:
-   ```bash
-   MODEL=m API_URL=http://localhost:8000 TEST_TYPE=bad RESULT_FILE=/tmp/out.json \
-     bash benchmarks/agentic_coding.sh 2>&1 || echo "exited non-zero as expected"
-   ```
 
-5. Run the test suite to confirm nothing broke: `cd utils && python -m pytest matrix_logic/ -v`
+4. Run the test suite to confirm nothing broke: `cd utils && python -m pytest matrix_logic/ -v`
    All 142 tests must still pass.
 
-6. Done. Report back. Do not proceed to Commit 6.
+5. Done. Report back. Do not proceed to Commit 7.
 
 ## Hard constraints
 
-- Do NOT modify any existing file — not benchmark_lib.sh, not any Python file, not any YAML file,
-  not any test file.
-- Do NOT create any new directories.
-- The ISL arrays must be exactly as specified above — these are hardcoded constants, not
-  configurable via YAML or env vars.
-- Source `benchmark_lib.sh` using a path relative to the script's own location (`$(dirname "$0")`),
-  not a hardcoded absolute path.
-- Use env vars for all inputs (MODEL, API_URL, etc.) — no CLI argument parsing.
-- Read `benchmark_lib.sh` before writing anything. Do not assume what `check_env_vars` looks like.
+- Modify ONLY `benchmarks/agentic_coding.sh`. Zero other files.
+- Do NOT change the ISL arrays, env var validation, or startup echo already in the script.
+- Parse `API_URL` into host and port inside the script — do not add new required env vars.
+- Use a relative path to `benchmark_serving.py` anchored at `$(dirname "$0")`.
+- Read `benchmark_serving.py`'s CLI before writing the invocation — flag names must be exact.
+- The `DELAY_S` sleep must only fire when `t > 0` (no sleep before the first turn).
+- Do NOT call `run_benchmark_serving` from `benchmark_lib.sh` — call `benchmark_serving.py`
+  directly with `python3`. The lib wrapper has a different interface and different assumptions.
