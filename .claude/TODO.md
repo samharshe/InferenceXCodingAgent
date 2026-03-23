@@ -4,21 +4,74 @@
 
 ---
 
-Current target: Commit 1 — Add `AgenticSearchSpaceEntry` and `AgenticMasterConfigEntry` to `validation.py`
+Current target: Commit 4 — Add agentic config entries to `nvidia-master.yaml`
 
-Steps:
-1. Open `utils/matrix_logic/validation.py`.
-2. After the existing `MultiNodeSearchSpaceEntry` class, add `AgenticSearchSpaceEntry`:
-   - Fields: `tp: int`, `ep: Optional[int] = None`, `dp_attn: Optional[bool] = Field(default=None, alias='dp-attn')`
-   - `model_config = ConfigDict(extra='forbid', populate_by_name=True)`
-3. After the existing `MultiNodeMasterConfigEntry` class, add `AgenticMasterConfigEntry`:
-   - Fields: `image`, `model`, `model_prefix` (alias `model-prefix`), `precision`, `framework`, `runner`
-   - `multinode: Literal[False]`, `agentic: Literal[True]`
-   - `test_type: Literal['ttft-caching', 'itl-bandwidth', 'ttft-delays']` (alias `test-type`)
-   - `num_prompts: int = Field(default=20, alias='num-prompts')`
-   - `delays: Optional[List[int]] = None`
-   - `search_space: List[AgenticSearchSpaceEntry]` (alias `search-space`)
-   - `@model_validator(mode='after')` that enforces delays ↔ test_type constraint
-4. Do NOT touch any existing class.
-5. Run `cd utils && python -m pytest matrix_logic/ -v` — confirm all existing tests still pass.
-6. Commit.
+## What this commit does
+
+Append three placeholder agentic entries to `.github/configs/nvidia-master.yaml`. Nothing else.
+
+No changes to Python files. No new files. No touching existing YAML entries.
+
+## Exact steps
+
+1. Open `.github/configs/nvidia-master.yaml`. Scroll to the very end of the file.
+2. Append these three entries exactly as written (use literal `<placeholder>` strings for image and model — do NOT invent real values):
+
+```yaml
+gptoss-fp8-b200-vllm-agentic-ttft-caching:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: ttft-caching
+  num-prompts: 20
+  search-space:
+    - tp: 1
+    - tp: 2
+
+gptoss-fp8-b200-vllm-agentic-itl-bandwidth:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: itl-bandwidth
+  num-prompts: 20
+  search-space:
+    - tp: 1
+
+gptoss-fp8-b200-vllm-agentic-ttft-delays:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: ttft-delays
+  delays: [0, 1, 5, 10, 60]
+  num-prompts: 20
+  search-space:
+    - tp: 1
+```
+
+3. Run `python utils/matrix_logic/generate_sweep_configs.py full-sweep --master-config .github/configs/nvidia-master.yaml` from the repo root. It must NOT raise any validation errors. (The generate logic will skip the new entries because they have no `seq-len-configs` — this is expected and acceptable. We only care that `validate_master_config` does not blow up.)
+4. Run `cd utils && python -m pytest matrix_logic/ -v` — all 142 tests must still pass.
+5. Done. Report back. Do not proceed to Commit 5.
+
+## Hard constraints
+
+- Do NOT modify `validation.py` or any test file.
+- Do NOT modify any existing YAML entry.
+- Do NOT create any new files.
+- The YAML keys must be exactly as written above: `gptoss-fp8-b200-vllm-agentic-ttft-caching`, `gptoss-fp8-b200-vllm-agentic-itl-bandwidth`, `gptoss-fp8-b200-vllm-agentic-ttft-delays`.
+- Use literal `<placeholder>` for `image` and `model` — do not invent values.
+- YAML field names must be kebab-case (e.g. `model-prefix`, `test-type`, `num-prompts`, `search-space`) — this is what `AgenticMasterConfigEntry` expects via its field aliases.

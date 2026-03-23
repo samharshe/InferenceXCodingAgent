@@ -10,7 +10,7 @@ Everything downstream (YAML validation, tests) depends on the schema being corre
 
 ### Morning 1
 
-**Commit 1 — Add `AgenticSearchSpaceEntry` and `AgenticMasterConfigEntry` to `validation.py`**
+**~~Commit 1 — Add `AgenticSearchSpaceEntry` and `AgenticMasterConfigEntry` to `validation.py`~~ ✓ DONE**
 
 - Open `utils/matrix_logic/validation.py`.
 - Add `AgenticSearchSpaceEntry` after the existing search-space classes:
@@ -48,7 +48,7 @@ Everything downstream (YAML validation, tests) depends on the schema being corre
   ```
 - Do NOT modify any existing classes.
 
-**Commit 2 — Update `validate_master_config` to dispatch agentic entries**
+**~~Commit 2 — Update `validate_master_config` to dispatch agentic entries~~ ✓ DONE**
 
 - In `validate_master_config`, add agentic dispatch before the existing multinode check:
   ```python
@@ -63,7 +63,7 @@ Everything downstream (YAML validation, tests) depends on the schema being corre
 - This must not touch the existing dispatch logic for non-agentic entries.
 - Run existing tests: `cd utils && python -m pytest matrix_logic/ -v` — all must pass.
 
-**Commit 3 — Write Pydantic validation tests**
+**~~Commit 3 — Write Pydantic validation tests~~ ✓ DONE**
 
 - Add tests to `utils/matrix_logic/test_validation.py` (import the new classes at the top).
 - Test cases to cover:
