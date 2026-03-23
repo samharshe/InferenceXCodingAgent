@@ -152,6 +152,10 @@ def generate_full_sweep(args, all_config_data, runner_data):
         if args.runner_type and val[Fields.RUNNER.value] not in args.runner_type:
             continue
 
+        # Agentic entries have no seq-len-configs; skip them in the standard sweep
+        if val.get('agentic', False):
+            continue
+
         # Check if this is a multinode config
         is_multinode = val.get(Fields.MULTINODE.value, False)
         # Get disagg value, defaulting to False if not specified

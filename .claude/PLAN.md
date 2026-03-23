@@ -84,7 +84,7 @@ Add real config entries to the master YAML. Validate they pass end-to-end via th
 
 ### Afternoon 1
 
-**Commit 4 — Add agentic config entries to `nvidia-master.yaml`**
+**~~Commit 4 — Add agentic config entries to `nvidia-master.yaml`~~ ✓ DONE**
 
 - Open `.github/configs/nvidia-master.yaml`.
 - Append three placeholder entries (use a placeholder image and model path — mark with `# TODO: replace with real values`):
