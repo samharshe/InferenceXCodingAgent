@@ -117,7 +117,20 @@ def chart_ttft_delays(results_dir):
     ax.set_title("TTFT vs. Context Length (Cache Eviction Under Delays)")
     ax.set_xlabel("Input Sequence Length (tokens)")
     ax.set_ylabel("Mean TTFT (ms)")
-    ax.legend()
+    # GPU legend — black lines, varying line style
+    gpu_handles = [
+        matplotlib.lines.Line2D([0], [0], color="black", linestyle=GPU_LINESTYLES[gpu], label=GPU_LABELS[gpu])
+        for gpu in GPUS
+    ]
+    gpu_leg = ax.legend(handles=gpu_handles, labels=[GPU_LABELS[gpu] for gpu in GPUS], loc="upper left")
+    ax.add_artist(gpu_leg)
+
+    # Delay legend — colored solid lines
+    delay_handles = [
+        matplotlib.lines.Line2D([0], [0], color=f"C{i}", linestyle="solid", label=f"{d}s")
+        for i, d in enumerate(DELAYS)
+    ]
+    ax.legend(handles=delay_handles, labels=[f"{d}s" for d in DELAYS], loc="upper right")
 
     out = os.path.join(results_dir, "chart_ttft_delays.png")
     fig.savefig(out, dpi=150)

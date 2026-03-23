@@ -101,19 +101,19 @@ visualize.py, open PNG and verify it renders.~~
 
 ~~**Smoke test:** same mock dir, verify PNG renders.~~
 
-### Commit 6 — chart_ttft_delays (lines only, single legend)
+### ~~Commit 6 — chart_ttft_delays (lines only, single legend)~~ DONE
 
-Implement `chart_ttft_delays(results_dir)`:
+~~Implement `chart_ttft_delays(results_dir)`:~~
 
-- Delays: `[0, 1, 5, 10, 60]`. GPUs: `[h100, h200, b200]`.
-- Load `{gpu}_ttft-delays_{d}s.json` for each (GPU, delay) pair. Skip missing with warning.
-- Line style per GPU: H100=solid, H200=dashed, B200=dotted.
-- Color per delay: tab10 C0–C4 for 0s, 1s, 5s, 10s, 60s.
-- Title: `"TTFT vs. Context Length (Cache Eviction Under Delays)"`.
-- X/Y axes same as other charts. Single combined legend for now.
-- Output: `chart_ttft_delays.png`. Print `Written: <path>`.
+~~- Delays: `[0, 1, 5, 10, 60]`. GPUs: `[h100, h200, b200]`.~~
+~~- Load `{gpu}_ttft-delays_{d}s.json` for each (GPU, delay) pair. Skip missing with warning.~~
+~~- Line style per GPU: H100=solid, H200=dashed, B200=dotted.~~
+~~- Color per delay: tab10 C0–C4 for 0s, 1s, 5s, 10s, 60s.~~
+~~- Title: `"TTFT vs. Context Length (Cache Eviction Under Delays)"`.~~
+~~- X/Y axes same as other charts. Single combined legend for now.~~
+~~- Output: `chart_ttft_delays.png`. Print `Written: <path>`.~~
 
-**Smoke test:** mock dir with a few delay files, verify PNG renders with multiple lines.
+~~**Smoke test:** mock dir with a few delay files, verify PNG renders with multiple lines.~~
 
 ### Commit 7 — chart_ttft_delays dual legend
 
