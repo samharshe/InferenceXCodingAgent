@@ -60,7 +60,33 @@ def chart_ttft_caching(results_dir):
 
 
 def chart_itl_bandwidth(results_dir):
-    print("TODO: chart_itl_bandwidth")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    any_data = False
+
+    for gpu in GPUS:
+        data = load_file(results_dir, f"{gpu}_itl-bandwidth.json")
+        if data is None:
+            continue
+        isl, itl = get_isl_and_metric(data["turns"], "itl_mean")
+        ax.plot(isl, itl, label=GPU_LABELS[gpu])
+        any_data = True
+
+    if not any_data:
+        print("Warning: no data for chart_itl_bandwidth, skipping")
+        plt.close(fig)
+        return
+
+    ax.set_xticks(ISL_POSITIONS)
+    ax.set_xticklabels(ISL_LABELS)
+    ax.set_title("ITL vs. Context Length (Memory Bandwidth)")
+    ax.set_xlabel("Input Sequence Length (tokens)")
+    ax.set_ylabel("Mean ITL (ms)")
+    ax.legend()
+
+    out = os.path.join(results_dir, "chart_itl_bandwidth.png")
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    print(f"Written: {out}")
 
 
 def chart_ttft_delays(results_dir):
