@@ -287,6 +287,41 @@ class MultiNodeMasterConfigEntry(BaseModel):
         alias=Fields.SEQ_LEN_CONFIGS.value)
 
 
+class AgenticSearchSpaceEntry(BaseModel):
+    """Agentic benchmark search space configuration. No concurrency fields — concurrency is always 1."""
+    model_config = ConfigDict(extra='forbid', populate_by_name=True)
+
+    tp: int
+    ep: Optional[int] = None
+    dp_attn: Optional[bool] = Field(default=None, alias='dp-attn')
+
+
+class AgenticMasterConfigEntry(BaseModel):
+    """Top-level agentic benchmark master configuration entry."""
+    model_config = ConfigDict(extra='forbid', populate_by_name=True)
+
+    image: str
+    model: str
+    model_prefix: str = Field(alias='model-prefix')
+    precision: str
+    framework: str
+    runner: str
+    multinode: Literal[False]
+    agentic: Literal[True]
+    test_type: Literal['ttft-caching', 'itl-bandwidth', 'ttft-delays'] = Field(alias='test-type')
+    num_prompts: int = Field(default=20, alias='num-prompts')
+    delays: Optional[List[int]] = None
+    search_space: List[AgenticSearchSpaceEntry] = Field(alias='search-space')
+
+    @model_validator(mode='after')
+    def validate_delays(self):
+        if self.test_type == 'ttft-delays' and not self.delays:
+            raise ValueError("'delays' is required when test-type is 'ttft-delays'")
+        if self.test_type != 'ttft-delays' and self.delays:
+            raise ValueError("'delays' is only valid when test-type is 'ttft-delays'")
+        return self
+
+
 def validate_master_config(master_configs: dict) -> List[dict]:
     """Validate input master configuration structure."""
     for key, entry in master_configs.items():
