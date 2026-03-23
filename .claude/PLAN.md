@@ -15,12 +15,12 @@ Two new files to implement. Nothing else is touched.
 
 ---
 
-## Phase 1 — wrap_result.py (Day 1, Morning)
+## ~~Phase 1 — wrap_result.py (Day 1, Morning)~~ DONE
 
-### Commit 1 — argparse skeleton
+### ~~Commit 1 — argparse skeleton~~ DONE
 
-Create `benchmarks/wrap_result.py` with all 8 required CLI args and a `main()` that
-parses and prints them. No logic yet.
+~~Create `benchmarks/wrap_result.py` with all 8 required CLI args and a `main()` that
+parses and prints them. No logic yet.~~
 
 ```
 --input PATH
@@ -33,61 +33,61 @@ parses and prints them. No logic yet.
 --timestamp STR
 ```
 
-**Smoke test:** `python benchmarks/wrap_result.py --help` shows all 8 args.
+~~**Smoke test:** `python benchmarks/wrap_result.py --help` shows all 8 args.~~
 
-### Commit 2 — full implementation
+### ~~Commit 2 — full implementation~~ DONE
 
-Add all validation and output logic:
+~~Add all validation and output logic:~~
 
-1. Read `--input` as JSON; stderr + exit 1 if file missing or invalid JSON.
-2. Validate parsed value is list of exactly 6 elements; stderr + exit 1 if not.
-3. Validate `--gpu` ∈ `{h100, h200, b200}`; stderr + exit 1 if not.
-4. Validate `--test-type` ∈ `{ttft-caching, itl-bandwidth, ttft-delays}`; stderr + exit 1 if not.
-5. Check parent dir of `--output` exists; stderr + exit 1 if not (do NOT mkdir).
-6. Write `{"meta": {...}, "turns": <input list>}` with `json.dump(..., indent=2)`.
-7. Print `Written: <output path>`; exit 0.
+~~1. Read `--input` as JSON; stderr + exit 1 if file missing or invalid JSON.~~
+~~2. Validate parsed value is list of exactly 6 elements; stderr + exit 1 if not.~~
+~~3. Validate `--gpu` ∈ `{h100, h200, b200}`; stderr + exit 1 if not.~~
+~~4. Validate `--test-type` ∈ `{ttft-caching, itl-bandwidth, ttft-delays}`; stderr + exit 1 if not.~~
+~~5. Check parent dir of `--output` exists; stderr + exit 1 if not (do NOT mkdir).~~
+~~6. Write `{"meta": {...}, "turns": <input list>}` with `json.dump(..., indent=2)`.~~
+~~7. Print `Written: <output path>`; exit 0.~~
 
-Dependencies: `argparse`, `json`, `sys`, `os` only.
+~~Dependencies: `argparse`, `json`, `sys`, `os` only.~~
 
-**Smoke test:** run against a hand-crafted 6-element JSON array; verify output file has
-correct `meta` block and `turns` array matches input.
+~~**Smoke test:** run against a hand-crafted 6-element JSON array; verify output file has
+correct `meta` block and `turns` array matches input.~~
 
 ---
 
 ## Phase 2 — visualize.py (Day 1, Afternoon + Day 2, Morning)
 
-### Commit 3 — skeleton with data loader
+### ~~Commit 3 — skeleton with data loader~~ DONE
 
-Create `benchmarks/visualize.py` with:
+~~Create `benchmarks/visualize.py` with:~~
 
-- Single positional arg `RESULTS_DIR`.
-- Directory existence check; stderr + exit 1 if not a directory.
-- `load_file(results_dir, filename)` helper: reads and returns parsed JSON, or `None`
-  with printed warning if file is missing.
-- `get_isl_and_metric(turns, metric_key)` helper: returns `(isl_list, metric_list)`.
-- Three stub chart functions: `chart_ttft_caching`, `chart_itl_bandwidth`,
-  `chart_ttft_delays` — each just prints `"TODO: <name>"` and returns.
-- `main()` calls all three stubs.
+~~- Single positional arg `RESULTS_DIR`.~~
+~~- Directory existence check; stderr + exit 1 if not a directory.~~
+~~- `load_file(results_dir, filename)` helper: reads and returns parsed JSON, or `None`
+  with printed warning if file is missing.~~
+~~- `get_isl_and_metric(turns, metric_key)` helper: returns `(isl_list, metric_list)`.~~
+~~- Three stub chart functions: `chart_ttft_caching`, `chart_itl_bandwidth`,
+  `chart_ttft_delays` — each just prints `"TODO: <name>"` and returns.~~
+~~- `main()` calls all three stubs.~~
 
-**Smoke test:** `python benchmarks/visualize.py /tmp/` runs without crash, prints three
-TODO lines.
+~~**Smoke test:** `python benchmarks/visualize.py /tmp/` runs without crash, prints three
+TODO lines.~~
 
-### Commit 4 — chart_ttft_caching
+### ~~Commit 4 — chart_ttft_caching~~ DONE
 
-Implement `chart_ttft_caching(results_dir)`:
+~~Implement `chart_ttft_caching(results_dir)`:~~
 
-- GPUs: `[h100, h200, b200]`. Load `{gpu}_ttft-caching.json` for each.
-- Skip GPU with warning if file missing. Skip chart entirely (with warning) if all missing.
-- Plot one line per GPU: x = isl, y = `ttft_mean`.
-- X-ticks: positions `[1000,11000,21000,31000,41000,51000]`, labels `["1k","11k","21k","31k","41k","51k"]`.
-- Title: `"TTFT vs. Context Length (KV Cache Reuse)"`.
-- X-label: `"Input Sequence Length (tokens)"`, Y-label: `"Mean TTFT (ms)"`.
-- Legend labels: `"H100"`, `"H200"`, `"B200"`.
-- Figure: 10×6 inches, 150 DPI. Save to `{results_dir}/chart_ttft_caching.png`.
-- Print `Written: <path>`.
+~~- GPUs: `[h100, h200, b200]`. Load `{gpu}_ttft-caching.json` for each.~~
+~~- Skip GPU with warning if file missing. Skip chart entirely (with warning) if all missing.~~
+~~- Plot one line per GPU: x = isl, y = `ttft_mean`.~~
+~~- X-ticks: positions `[1000,11000,21000,31000,41000,51000]`, labels `["1k","11k","21k","31k","41k","51k"]`.~~
+~~- Title: `"TTFT vs. Context Length (KV Cache Reuse)"`.~~
+~~- X-label: `"Input Sequence Length (tokens)"`, Y-label: `"Mean TTFT (ms)"`.~~
+~~- Legend labels: `"H100"`, `"H200"`, `"B200"`.~~
+~~- Figure: 10×6 inches, 150 DPI. Save to `{results_dir}/chart_ttft_caching.png`.~~
+~~- Print `Written: <path>`.~~
 
-**Smoke test:** create a mock results dir with one `h100_ttft-caching.json`, run
-visualize.py, open PNG and verify it renders.
+~~**Smoke test:** create a mock results dir with one `h100_ttft-caching.json`, run
+visualize.py, open PNG and verify it renders.~~
 
 ### Commit 5 — chart_itl_bandwidth
 
