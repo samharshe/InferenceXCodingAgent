@@ -115,24 +115,15 @@ visualize.py, open PNG and verify it renders.~~
 
 ~~**Smoke test:** mock dir with a few delay files, verify PNG renders with multiple lines.~~
 
-### Commit 7 — chart_ttft_delays dual legend
+### ~~Commit 7 — chart_ttft_delays dual legend~~ DONE
 
-Replace single legend with two per spec, using `matplotlib.lines.Line2D` proxy artists:
+~~Replace single legend with two per spec, using `matplotlib.lines.Line2D` proxy artists:~~
 
-**GPU legend** — black lines varying line style, `loc='upper left'`:
-```python
-gpu_leg = ax.legend(gpu_handles, gpu_labels, loc='upper left')
-ax.add_artist(gpu_leg)
-```
+~~**GPU legend** — black lines varying line style, `loc='upper left'`:~~
+~~**Delay legend** — colored solid lines, `loc='upper right'`:~~
+~~Both must be visible without overlap.~~
 
-**Delay legend** — colored solid lines, `loc='upper right'`:
-```python
-ax.legend(delay_handles, delay_labels, loc='upper right')
-```
-
-Both must be visible without overlap.
-
-**Smoke test:** verify the PNG shows two distinct labeled legend boxes.
+~~**Smoke test:** verify the PNG shows two distinct labeled legend boxes.~~
 
 ---
 
