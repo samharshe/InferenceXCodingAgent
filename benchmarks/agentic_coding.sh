@@ -54,3 +54,42 @@ for t in 0 1 2 3 4 5; do
 done
 
 echo "All turns complete."
+
+# Aggregate per-turn results into $RESULT_FILE
+python3 -c "
+import json, sys
+
+ISL_VALUES = [1000, 11000, 21000, 31000, 41000, 51000]
+PREFIX_LENS = [0, 1000, 11000, 21000, 31000, 41000]
+NEW_TOKENS  = [1000, 10000, 10000, 10000, 10000, 10000]
+
+turns = []
+for t in range(6):
+    path = f'/tmp/agentic_turn_{t}.json'
+    with open(path) as f:
+        d = json.load(f)
+    turns.append({
+        'turn':       t,
+        'isl':        ISL_VALUES[t],
+        'prefix_len': PREFIX_LENS[t],
+        'new_tokens': NEW_TOKENS[t],
+        'delay_s':    int('${DELAY_S}'),
+        'ttft_mean':  d.get('mean_ttft_ms'),
+        'ttft_p50':   d.get('median_ttft_ms'),
+        'ttft_p99':   d.get('p99_ttft_ms'),
+        'itl_mean':   d.get('mean_itl_ms'),
+        'itl_p50':    d.get('median_itl_ms'),
+        'itl_p99':    d.get('p99_itl_ms'),
+        'num_prompts': int('${NUM_PROMPTS}'),
+    })
+
+with open('${RESULT_FILE}', 'w') as f:
+    json.dump(turns, f, indent=2)
+"
+
+# Clean up per-turn temp files
+for t in 0 1 2 3 4 5; do
+    rm -f "/tmp/agentic_turn_${t}.json"
+done
+
+echo "Results written to $RESULT_FILE."
