@@ -325,10 +325,13 @@ class AgenticMasterConfigEntry(BaseModel):
 def validate_master_config(master_configs: dict) -> List[dict]:
     """Validate input master configuration structure."""
     for key, entry in master_configs.items():
+        is_agentic = entry.get('agentic', False)
         is_multinode = entry.get('multinode', False)
 
         try:
-            if is_multinode:
+            if is_agentic:
+                AgenticMasterConfigEntry(**entry)
+            elif is_multinode:
                 MultiNodeMasterConfigEntry(**entry)
             else:
                 SingleNodeMasterConfigEntry(**entry)
