@@ -1,5 +1,6 @@
 """Comprehensive tests for validation.py"""
 import pytest
+from pydantic import ValidationError
 from validation import (
     Fields,
     SingleNodeMatrixEntry,
@@ -11,6 +12,8 @@ from validation import (
     MultiNodeSeqLenConfig,
     SingleNodeMasterConfigEntry,
     MultiNodeMasterConfigEntry,
+    AgenticSearchSpaceEntry,
+    AgenticMasterConfigEntry,
     validate_matrix_entry,
     validate_master_config,
     validate_runner_config,
@@ -869,3 +872,92 @@ h100: not-a-list
         with pytest.raises(ValueError) as exc_info:
             load_runner_file(str(runner_file))
         assert "must be a list" in str(exc_info.value)
+
+
+# =============================================================================
+# Test AgenticValidation
+# =============================================================================
+
+class TestAgenticValidation:
+    """Tests for AgenticMasterConfigEntry and AgenticSearchSpaceEntry models."""
+
+    def test_valid_ttft_caching_entry(self):
+        """Valid ttft-caching entry should pass without error."""
+        AgenticMasterConfigEntry(**{
+            'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+            'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+            'multinode': False, 'agentic': True,
+            'test-type': 'ttft-caching', 'num-prompts': 20,
+            'search-space': [{'tp': 1}],
+        })
+
+    def test_valid_itl_bandwidth_entry(self):
+        """Valid itl-bandwidth entry should pass without error."""
+        AgenticMasterConfigEntry(**{
+            'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+            'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+            'multinode': False, 'agentic': True,
+            'test-type': 'itl-bandwidth', 'num-prompts': 20,
+            'search-space': [{'tp': 1}],
+        })
+
+    def test_valid_ttft_delays_entry(self):
+        """Valid ttft-delays entry with delays list should pass without error."""
+        AgenticMasterConfigEntry(**{
+            'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+            'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+            'multinode': False, 'agentic': True,
+            'test-type': 'ttft-delays', 'num-prompts': 20,
+            'delays': [0, 1, 5, 10, 60],
+            'search-space': [{'tp': 1}],
+        })
+
+    def test_ttft_delays_without_delays_raises(self):
+        """ttft-delays with no delays field should raise ValueError."""
+        with pytest.raises(ValueError):
+            AgenticMasterConfigEntry(**{
+                'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+                'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+                'multinode': False, 'agentic': True,
+                'test-type': 'ttft-delays', 'num-prompts': 20,
+                'search-space': [{'tp': 1}],
+            })
+
+    def test_ttft_caching_with_delays_raises(self):
+        """ttft-caching with delays field present should raise ValueError."""
+        with pytest.raises(ValueError):
+            AgenticMasterConfigEntry(**{
+                'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+                'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+                'multinode': False, 'agentic': True,
+                'test-type': 'ttft-caching', 'num-prompts': 20,
+                'delays': [0, 1, 5],
+                'search-space': [{'tp': 1}],
+            })
+
+    def test_unknown_extra_field_raises_validation_error(self):
+        """Unknown extra field should raise ValidationError (extra='forbid')."""
+        with pytest.raises(ValidationError):
+            AgenticMasterConfigEntry(**{
+                'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+                'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+                'multinode': False, 'agentic': True,
+                'test-type': 'ttft-caching', 'num-prompts': 20,
+                'search-space': [{'tp': 1}],
+                'unknown-field': 'value',
+            })
+
+    def test_validate_master_config_mixed_agentic_and_single_node(self, valid_single_node_master_config):
+        """validate_master_config with one agentic and one single-node entry should pass."""
+        configs = {
+            'gptoss-fp8-b200-vllm-agentic-ttft-caching': {
+                'image': 'img', 'model': 'mdl', 'model-prefix': 'pfx',
+                'precision': 'fp8', 'framework': 'vllm', 'runner': 'b200',
+                'multinode': False, 'agentic': True,
+                'test-type': 'ttft-caching', 'num-prompts': 20,
+                'search-space': [{'tp': 1}],
+            },
+            'dsr1-fp8-mi300x-sglang': valid_single_node_master_config,
+        }
+        result = validate_master_config(configs)
+        assert len(result) == 2
