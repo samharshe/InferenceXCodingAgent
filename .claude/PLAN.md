@@ -163,7 +163,7 @@ The shell script is the core runtime artifact. It has no unit tests — correctn
 - Validate `TEST_TYPE` is one of `ttft-caching`, `itl-bandwidth`, `ttft-delays`. Exit 1 otherwise.
 - No turn loop yet. Script exits cleanly after validation. Mark file executable (`chmod +x`).
 
-**Commit 6 — Add the turn loop with per-turn `benchmark_serving.py` invocations**
+**~~Commit 6 — Add the turn loop with per-turn `benchmark_serving.py` invocations~~ ✓ DONE**
 
 - Add a `for t in 0 1 2 3 4 5` loop.
 - For each turn:
@@ -183,16 +183,12 @@ The shell script is the core runtime artifact. It has no unit tests — correctn
   4. Echo progress: `echo "Turn $t complete: ISL=${ISL_VALUES[$t]}"`.
 - After loop, echo "All turns complete."
 
-**Commit 7 — Add result aggregation into a single JSON output file**
+**~~Commit 7 — Add result aggregation into a single JSON output file~~ ✓ DONE**
 
 - After the turn loop, aggregate the six per-turn JSON files into `$RESULT_FILE`.
-- Use Python inline (`python3 -c "..."`) to:
-  1. Load each `/tmp/agentic_turn_${t}.json`.
-  2. Extract fields: `mean_ttft_ms`, `p50_ttft_ms`, `p99_ttft_ms`, `mean_itl_ms`, `p50_itl_ms`, `p99_itl_ms` (exact keys from `benchmark_serving.py` output — verify against the script before writing).
-  3. Build a per-turn object with keys: `turn`, `isl`, `prefix_len`, `new_tokens`, `delay_s`, `ttft_mean`, `ttft_p50`, `ttft_p99`, `itl_mean`, `itl_p50`, `itl_p99`, `num_prompts`.
-  4. Write the array to `$RESULT_FILE`.
-- Clean up temp files.
-- Echo "Results written to $RESULT_FILE."
+- Verified key names from `benchmark_serving.py` source: `mean_ttft_ms`, `median_ttft_ms` (p50), `p99_ttft_ms`, `mean_itl_ms`, `median_itl_ms` (p50), `p99_itl_ms`.
+- Used inline `python3 -c "..."` to load, transform, and write to `$RESULT_FILE`.
+- Cleaned up `/tmp/agentic_turn_{0..5}.json` temp files after write.
 
 ---
 

@@ -55,6 +55,9 @@ done
 
 echo "All turns complete."
 
+# Verified output keys from benchmark_serving.py (default --percentile-metrics=ttft,tpot,itl
+# and --metric-percentiles=99): mean_ttft_ms, median_ttft_ms (p50), p99_ttft_ms,
+# mean_itl_ms, median_itl_ms (p50), p99_itl_ms.
 # Aggregate per-turn results into $RESULT_FILE
 python3 -c "
 import json, sys

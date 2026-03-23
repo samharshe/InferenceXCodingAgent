@@ -5,87 +5,62 @@
 ---
 
 
-Current target: Commit 6 — Add the turn loop with per-turn `benchmark_serving.py` invocations
+Current target: Commit 8 — Smoke-test the shell script and document verified field names
 
 ## What this commit does
 
-Extend `benchmarks/agentic_coding.sh` (the only file you touch) with a six-turn loop that
-calls `benchmark_serving.py` once per turn. After the loop, print a completion message.
-No aggregation yet — that is Commit 7.
+Verify `benchmarks/agentic_coding.sh` end-to-end by inspecting the script
+logic against `benchmark_serving.py`'s CLI flags and JSON output structure.
+Document the verified field names in a comment at the top of the aggregation
+block inside the script. If any bugs are found, fix them in the same commit.
 
-**No other files are modified.** Do not touch Python files, YAML files, `benchmark_lib.sh`,
-or any test file.
+**The ONLY file you touch is `benchmarks/agentic_coding.sh`.** Do not touch
+Python files, YAML files, `benchmark_lib.sh`, test files, or any other file.
 
 ## Exact steps
 
-1. Read `utils/bench_serving/benchmark_serving.py` — specifically its CLI flags — before
-   writing anything. You must confirm the exact flag names for:
-   - specifying host/port or base URL
-   - `--random-input-len`, `--random-prefix-len`, `--random-output-len`, `--random-range-ratio`
-   - `--num-prompts`
-   - saving results (`--save-result`, `--result-filename`, `--result-dir`)
-   Do not guess flag names. Read the source.
+1. **Read the current state of `benchmarks/agentic_coding.sh`** in full before
+   touching anything.
 
-2. Add the following block to `benchmarks/agentic_coding.sh` after the startup echo, replacing
-   nothing that is already there:
+2. **Verify the following by cross-referencing `benchmark_serving.py`:**
+   - Every CLI flag passed to `benchmark_serving.py` is valid (grep the arg
+     parser to confirm `--backend`, `--host`, `--port`, `--model`,
+     `--dataset-name`, `--random-input-len`, `--random-prefix-len`,
+     `--random-output-len`, `--random-range-ratio`, `--num-prompts`,
+     `--save-result`, `--result-filename` all exist).
+   - The JSON output keys used in the aggregation block (`mean_ttft_ms`,
+     `median_ttft_ms`, `p99_ttft_ms`, `mean_itl_ms`, `median_itl_ms`,
+     `p99_itl_ms`) are actually written by `benchmark_serving.py` under
+     default `--percentile-metrics` and `--metric-percentiles` settings.
+   - The `$RESULT_FILE` is written via `open()` in Python, not stdout redirect.
+   - The temp file cleanup loop covers exactly turns 0–5.
+
+3. **Add a comment block** immediately above the `python3 -c "..."` aggregation
+   line (after `echo "All turns complete."`). The comment must read exactly:
 
    ```bash
-   for t in 0 1 2 3 4 5; do
-       if [[ $t -gt 0 && "${DELAY_S}" -gt 0 ]]; then
-           sleep "$DELAY_S"
-       fi
-
-       TURN_RESULT_FILE="/tmp/agentic_turn_${t}.json"
-
-       # Parse host and port from API_URL (e.g. http://hostname:8000)
-       API_HOST=$(echo "$API_URL" | sed 's|https\?://||' | cut -d: -f1)
-       API_PORT=$(echo "$API_URL" | sed 's|.*:||')
-
-       python3 <path-to-benchmark_serving.py> \
-           --backend openai \
-           --host "$API_HOST" \
-           --port "$API_PORT" \
-           --model "$MODEL" \
-           --random-input-len "${NEW_TOKENS[$t]}" \
-           --random-prefix-len "${PREFIX_LENS[$t]}" \
-           --random-output-len 1000 \
-           --random-range-ratio 1.0 \
-           --num-prompts "$NUM_PROMPTS" \
-           --save-result \
-           --result-filename "$TURN_RESULT_FILE"
-
-       echo "Turn $t complete: ISL=${ISL_VALUES[$t]}"
-   done
-
-   echo "All turns complete."
+   # Verified output keys from benchmark_serving.py (default --percentile-metrics=ttft,tpot,itl
+   # and --metric-percentiles=99): mean_ttft_ms, median_ttft_ms (p50), p99_ttft_ms,
+   # mean_itl_ms, median_itl_ms (p50), p99_itl_ms.
    ```
 
-   Use a path to `benchmark_serving.py` relative to the script's own location
-   (`$(dirname "$0")/../utils/bench_serving/benchmark_serving.py`) — do NOT hardcode an
-   absolute path.
+   Do NOT modify any logic — only add this comment.
 
-   Verify the flag names against the actual CLI before committing. If the script uses
-   `--result-filename` differently (e.g., requires no `.json` extension, or uses `--result-dir`
-   separately), match the actual interface exactly.
-
-3. Smoke-test — run the script with missing env vars to confirm validation still exits non-zero
-   (the loop must not have broken the guard):
+4. **Smoke-test** — confirm the guard still exits non-zero with missing env vars:
    ```bash
    bash benchmarks/agentic_coding.sh 2>&1 || echo "exited non-zero as expected"
    ```
 
-4. Run the test suite to confirm nothing broke: `cd utils && python -m pytest matrix_logic/ -v`
+5. **Run the test suite**: `cd utils && python -m pytest matrix_logic/ -v`
    All 142 tests must still pass.
 
-5. Done. Report back. Do not proceed to Commit 7.
+6. Done. Report back. Do not proceed to Commit 9.
 
 ## Hard constraints
 
 - Modify ONLY `benchmarks/agentic_coding.sh`. Zero other files.
-- Do NOT change the ISL arrays, env var validation, or startup echo already in the script.
-- Parse `API_URL` into host and port inside the script — do not add new required env vars.
-- Use a relative path to `benchmark_serving.py` anchored at `$(dirname "$0")`.
-- Read `benchmark_serving.py`'s CLI before writing the invocation — flag names must be exact.
-- The `DELAY_S` sleep must only fire when `t > 0` (no sleep before the first turn).
-- Do NOT call `run_benchmark_serving` from `benchmark_lib.sh` — call `benchmark_serving.py`
-  directly with `python3`. The lib wrapper has a different interface and different assumptions.
+- The only change to the script is adding the comment block in step 3.
+  If verification in step 2 reveals a bug, fix it — but explain the bug
+  clearly before patching it.
+- Do NOT reformat, reorder, or touch any existing lines outside the comment.
+- Do NOT add a separate `.py` file or any other artifact.
