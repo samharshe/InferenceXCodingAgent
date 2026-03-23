@@ -13,6 +13,7 @@ check_env_vars MODEL API_URL TEST_TYPE RESULT_FILE
 
 NUM_PROMPTS=${NUM_PROMPTS:-20}
 DELAY_S=${DELAY_S:-0}
+IGNORE_EOS=${IGNORE_EOS:-true}
 
 if [[ "$TEST_TYPE" != "ttft-caching" && "$TEST_TYPE" != "itl-bandwidth" && "$TEST_TYPE" != "ttft-delays" ]]; then
     echo "Error: TEST_TYPE must be one of: ttft-caching, itl-bandwidth, ttft-delays (got: '$TEST_TYPE')" >&2
@@ -43,6 +44,7 @@ for t in 0 1 2 3 4 5; do
         --random-output-len 1000 \
         --random-range-ratio 1.0 \
         --num-prompts "$NUM_PROMPTS" \
+        $( [[ "$IGNORE_EOS" == "true" ]] && echo "--ignore-eos" ) \
         --save-result \
         --result-filename "$TURN_RESULT_FILE"
 
