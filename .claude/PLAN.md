@@ -198,12 +198,12 @@ These commits do not add features — they catch mistakes made in Phase 3.
 
 ### Afternoon 2
 
-**Commit 8 — Smoke-test the shell script against a local mock server (dry run)**
+**~~Commit 8 — Smoke-test the shell script against a local mock server (dry run)~~ ✓ DONE**
 
-- This commit documents the outcome of manual testing.
-- If the script runs end-to-end (even with a mock server returning dummy JSON), confirm all six temp files are created and the aggregated JSON is valid.
-- Fix any discovered bugs. The fix goes in the same commit as the test outcome notes (add a comment in the script if needed).
-- If the mock server cannot be run in this environment, verify by inspecting the script logic against `benchmark_serving.py`'s CLI flags and JSON output structure — document the verified field names in a comment at the top of the aggregation block.
+- Mock server not available; verified by inspection against `benchmark_serving.py` source.
+- All CLI flags confirmed valid. Output key names confirmed: `mean_ttft_ms`, `median_ttft_ms` (p50), `p99_ttft_ms`, `mean_itl_ms`, `median_itl_ms` (p50), `p99_itl_ms`.
+- Added verified-keys comment block above aggregation code. No logic bugs found.
+- Smoke test (missing env vars → non-zero exit) and 142-test suite both passed.
 
 **Commit 9 — Update `TODO.md` and `PLAN.md` to reflect completion**
 

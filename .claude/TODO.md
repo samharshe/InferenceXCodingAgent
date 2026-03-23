@@ -5,62 +5,40 @@
 ---
 
 
-Current target: Commit 8 — Smoke-test the shell script and document verified field names
+Current target: Commit 9 — Mark all planning docs complete and record loose ends
 
 ## What this commit does
 
-Verify `benchmarks/agentic_coding.sh` end-to-end by inspecting the script
-logic against `benchmark_serving.py`'s CLI flags and JSON output structure.
-Document the verified field names in a comment at the top of the aggregation
-block inside the script. If any bugs are found, fix them in the same commit.
+This is a pure documentation commit. No source code, no shell scripts, no Python,
+no YAML. The only files touched are `.claude/PLAN.md`, `.claude/TODO.md`, and
+`.claude/LOOSE_ENDS.md`.
 
-**The ONLY file you touch is `benchmarks/agentic_coding.sh`.** Do not touch
-Python files, YAML files, `benchmark_lib.sh`, test files, or any other file.
+Mark every commit in `PLAN.md` as ✓ DONE. Capture any remaining loose ends in
+`LOOSE_ENDS.md`. Overwrite `TODO.md` with a "project complete" stub.
 
 ## Exact steps
 
-1. **Read the current state of `benchmarks/agentic_coding.sh`** in full before
-   touching anything.
+1. **Update `PLAN.md`**: Mark Commit 9 itself as `~~...~~ ✓ DONE`. Every commit
+   entry in the file must now have the strikethrough + checkmark format. Do not
+   change any other content.
 
-2. **Verify the following by cross-referencing `benchmark_serving.py`:**
-   - Every CLI flag passed to `benchmark_serving.py` is valid (grep the arg
-     parser to confirm `--backend`, `--host`, `--port`, `--model`,
-     `--dataset-name`, `--random-input-len`, `--random-prefix-len`,
-     `--random-output-len`, `--random-range-ratio`, `--num-prompts`,
-     `--save-result`, `--result-filename` all exist).
-   - The JSON output keys used in the aggregation block (`mean_ttft_ms`,
-     `median_ttft_ms`, `p99_ttft_ms`, `mean_itl_ms`, `median_itl_ms`,
-     `p99_itl_ms`) are actually written by `benchmark_serving.py` under
-     default `--percentile-metrics` and `--metric-percentiles` settings.
-   - The `$RESULT_FILE` is written via `open()` in Python, not stdout redirect.
-   - The temp file cleanup loop covers exactly turns 0–5.
+2. **Update `LOOSE_ENDS.md`**: Review the entire implementation (Commits 1–8) and
+   add any loose ends not yet recorded. At minimum, verify the existing entry about
+   `check_env_vars` / `set -u` incompatibility is still accurate. Add new entries
+   if anything was noticed but not yet written down. Do not remove existing entries.
 
-3. **Add a comment block** immediately above the `python3 -c "..."` aggregation
-   line (after `echo "All turns complete."`). The comment must read exactly:
+3. **Overwrite `TODO.md`** with a stub that says the project is complete and points
+   to `PLAN.md` for history and `LOOSE_ENDS.md` for known issues.
 
-   ```bash
-   # Verified output keys from benchmark_serving.py (default --percentile-metrics=ttft,tpot,itl
-   # and --metric-percentiles=99): mean_ttft_ms, median_ttft_ms (p50), p99_ttft_ms,
-   # mean_itl_ms, median_itl_ms (p50), p99_itl_ms.
-   ```
+4. **Run the test suite one final time**: `cd utils && python -m pytest matrix_logic/ -v`
+   All 142 tests must pass.
 
-   Do NOT modify any logic — only add this comment.
-
-4. **Smoke-test** — confirm the guard still exits non-zero with missing env vars:
-   ```bash
-   bash benchmarks/agentic_coding.sh 2>&1 || echo "exited non-zero as expected"
-   ```
-
-5. **Run the test suite**: `cd utils && python -m pytest matrix_logic/ -v`
-   All 142 tests must still pass.
-
-6. Done. Report back. Do not proceed to Commit 9.
+5. Done. Report back.
 
 ## Hard constraints
 
-- Modify ONLY `benchmarks/agentic_coding.sh`. Zero other files.
-- The only change to the script is adding the comment block in step 3.
-  If verification in step 2 reveals a bug, fix it — but explain the bug
-  clearly before patching it.
-- Do NOT reformat, reorder, or touch any existing lines outside the comment.
-- Do NOT add a separate `.py` file or any other artifact.
+- Touch ONLY `.claude/PLAN.md`, `.claude/TODO.md`, `.claude/LOOSE_ENDS.md`.
+- Zero changes to any source file (no `.sh`, `.py`, `.yaml`, or other file).
+- Do NOT reformat or restructure `PLAN.md` — only update the Commit 9 entry.
+- Do NOT invent loose ends. Only record things actually observed during implementation.
+- Do NOT add a `CHANGELOG`, `RELEASE`, or any other new file.
