@@ -89,17 +89,17 @@ TODO lines.~~
 ~~**Smoke test:** create a mock results dir with one `h100_ttft-caching.json`, run
 visualize.py, open PNG and verify it renders.~~
 
-### Commit 5 — chart_itl_bandwidth
+### ~~Commit 5 — chart_itl_bandwidth~~ DONE
 
-Implement `chart_itl_bandwidth(results_dir)`. Identical structure to chart 1 except:
+~~Implement `chart_itl_bandwidth(results_dir)`. Identical structure to chart 1 except:~~
 
-- Loads `{gpu}_itl-bandwidth.json`.
-- Y metric: `itl_mean`.
-- Title: `"ITL vs. Context Length (Memory Bandwidth)"`.
-- Y-label: `"Mean ITL (ms)"`.
-- Output: `chart_itl_bandwidth.png`.
+~~- Loads `{gpu}_itl-bandwidth.json`.~~
+~~- Y metric: `itl_mean`.~~
+~~- Title: `"ITL vs. Context Length (Memory Bandwidth)"`.~~
+~~- Y-label: `"Mean ITL (ms)"`.~~
+~~- Output: `chart_itl_bandwidth.png`.~~
 
-**Smoke test:** same mock dir, verify PNG renders.
+~~**Smoke test:** same mock dir, verify PNG renders.~~
 
 ### Commit 6 — chart_ttft_delays (lines only, single legend)
 

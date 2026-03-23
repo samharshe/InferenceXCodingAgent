@@ -90,7 +90,39 @@ def chart_itl_bandwidth(results_dir):
 
 
 def chart_ttft_delays(results_dir):
-    print("TODO: chart_ttft_delays")
+    DELAYS = [0, 1, 5, 10, 60]
+    GPU_LINESTYLES = {"h100": "solid", "h200": "dashed", "b200": "dotted"}
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    any_data = False
+
+    for gpu in GPUS:
+        for delay in DELAYS:
+            data = load_file(results_dir, f"{gpu}_ttft-delays_{delay}s.json")
+            if data is None:
+                continue
+            isl, ttft = get_isl_and_metric(data["turns"], "ttft_mean")
+            color = f"C{DELAYS.index(delay)}"
+            linestyle = GPU_LINESTYLES[gpu]
+            ax.plot(isl, ttft, color=color, linestyle=linestyle, label=f"{GPU_LABELS[gpu]} {delay}s")
+            any_data = True
+
+    if not any_data:
+        print("Warning: no data for chart_ttft_delays, skipping")
+        plt.close(fig)
+        return
+
+    ax.set_xticks(ISL_POSITIONS)
+    ax.set_xticklabels(ISL_LABELS)
+    ax.set_title("TTFT vs. Context Length (Cache Eviction Under Delays)")
+    ax.set_xlabel("Input Sequence Length (tokens)")
+    ax.set_ylabel("Mean TTFT (ms)")
+    ax.legend()
+
+    out = os.path.join(results_dir, "chart_ttft_delays.png")
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    print(f"Written: {out}")
 
 
 def main():
