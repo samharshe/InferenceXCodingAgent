@@ -205,10 +205,19 @@ These commits do not add features — they catch mistakes made in Phase 3.
 - Added verified-keys comment block above aggregation code. No logic bugs found.
 - Smoke test (missing env vars → non-zero exit) and 142-test suite both passed.
 
-**Commit 9 — Update `TODO.md` and `PLAN.md` to reflect completion**
+**~~Commit 9 — Update `TODO.md` and `PLAN.md` to reflect completion~~ ✓ DONE**
 
-- Mark all steps done.
-- Note any loose ends discovered during implementation in `LOOSE_ENDS.md`.
+- Marked all steps done. Recorded loose ends in `LOOSE_ENDS.md`. Wrote `UNDERSTANDING.md`.
+
+---
+
+## Phase 5: Polish
+
+**Commit 10 — Fix `check_env_vars` to be compatible with `set -u`**
+
+- In `benchmark_lib.sh`, change `${!var_name}` to `${!var_name+x}` in `check_env_vars`.
+- Remove the `set +u` / `set -u` workaround from `agentic_coding.sh`.
+- Mark the loose end in `LOOSE_ENDS.md` as resolved.
 
 ---
 

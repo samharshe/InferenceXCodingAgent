@@ -9,11 +9,7 @@ ISL_VALUES=(1000 11000 21000 31000 41000 51000)
 PREFIX_LENS=(0 1000 11000 21000 31000 41000)
 NEW_TOKENS=(1000 10000 10000 10000 10000 10000)
 
-# check_env_vars uses ${!var_name} (indirect expansion) which is incompatible with set -u;
-# temporarily disable nounset so the function can detect and report missing vars itself.
-set +u
 check_env_vars MODEL API_URL TEST_TYPE RESULT_FILE
-set -u
 
 NUM_PROMPTS=${NUM_PROMPTS:-20}
 DELAY_S=${DELAY_S:-0}

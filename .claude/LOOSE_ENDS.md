@@ -19,3 +19,5 @@ missing variable.
 check, e.g. `${!var_name+x}` (parameter expansion that returns `x` if set, empty if unset) —
 this works under `set -u` without triggering an error. Requires touching `benchmark_lib.sh`,
 which was out of scope for Commit 5.
+
+**Resolved in Commit 10.**
