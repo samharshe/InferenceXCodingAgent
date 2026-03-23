@@ -7537,3 +7537,47 @@ dsr1-fp4-b200-dynamo-sglang-mtp:
         tp: 8
         ep: 1
         dp-attn: false
+
+gptoss-fp8-b200-vllm-agentic-ttft-caching:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: ttft-caching
+  num-prompts: 20
+  search-space:
+    - tp: 1
+    - tp: 2
+
+gptoss-fp8-b200-vllm-agentic-itl-bandwidth:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: itl-bandwidth
+  num-prompts: 20
+  search-space:
+    - tp: 1
+
+gptoss-fp8-b200-vllm-agentic-ttft-delays:
+  image: <placeholder>  # TODO: replace with real values
+  model: <placeholder>  # TODO: replace with real values
+  model-prefix: gptoss
+  precision: fp8
+  framework: vllm
+  runner: b200
+  multinode: false
+  agentic: true
+  test-type: ttft-delays
+  delays: [0, 1, 5, 10, 60]
+  num-prompts: 20
+  search-space:
+    - tp: 1
